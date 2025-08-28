@@ -1,0 +1,378 @@
+version: '3.8'
+
+services:
+  # Database Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: healthcare-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-healthcare_registry}
+      POSTGRES_USER: ${POSTGRES_USER:-healthcare_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - healthcare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-healthcare_admin}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: healthcare-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-RedisPassword123!}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-RedisPassword123!}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - healthcare-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Authentication Service
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: healthcare-keycloak
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-KeycloakAdmin123!}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-healthcare_registry}
+      KC_DB_USERNAME: ${POSTGRES_USER:-healthcare_admin}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
+      KC_HOSTNAME: localhost
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+    command: start-dev
+    volumes:
+      - ./keycloak/themes:/opt/keycloak/themes
+      - ./keycloak/config:/opt/keycloak/data/import
+    ports:
+      - "8080:8080"
+    networks:
+      - healthcare-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Hyperledger Identus Agent
+  identus-agent:
+    image: ghcr.io/hyperledger/identus-cloud-agent:1.33.0
+    container_name: healthcare-identus
+    environment:
+      AGENT_HTTP_PORT: 8085
+      AGENT_DIDCOMM_PORT: 7085
+      AGENT_METRICS_PORT: 9085
+      POLLUX_DB_HOST: postgres
+      POLLUX_DB_PORT: 5432
+      POLLUX_DB_NAME: ${POSTGRES_DB:-healthcare_registry}
+      POLLUX_DB_USER: ${POSTGRES_USER:-healthcare_admin}
+      POLLUX_DB_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
+      CASTOR_DB_HOST: postgres
+      CASTOR_DB_PORT: 5432
+      CASTOR_DB_NAME: ${POSTGRES_DB:-healthcare_registry}
+      CASTOR_DB_USER: ${POSTGRES_USER:-healthcare_admin}
+      CASTOR_DB_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
+      CONNECT_DB_HOST: postgres
+      CONNECT_DB_PORT: 5432
+      CONNECT_DB_NAME: ${POSTGRES_DB:-healthcare_registry}
+      CONNECT_DB_USER: ${POSTGRES_USER:-healthcare_admin}
+      CONNECT_DB_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
+      AGENT_WALLET_SEED: ${IDENTUS_WALLET_SEED:-wallet_seed_minimum_32_characters_required_here}
+      API_KEY_SALT: ${IDENTUS_API_KEY_SALT:-identus_salt_32_chars_minimum_req}
+      API_KEY_ENABLED: true
+      WEBHOOK_URL: ${IDENTUS_WEBHOOK_URL:-http://api-gateway:8081/webhooks/identus}
+      ADMIN_TOKEN: ${IDENTUS_ADMIN_TOKEN:-identus_admin_token_12345}
+    ports:
+      - "8085:8085"
+      - "7085:7085"
+      - "9085:9085"
+    networks:
+      - healthcare-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/_system/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend Services
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: healthcare-api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-healthcare_registry}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-healthcare_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-RedisPassword123!}
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      IDENTUS_AGENT_URL: http://identus-agent:8085
+      JWT_SECRET: ${JWT_SECRET:-jwt_secret_key_minimum_32_characters_required_for_security}
+    ports:
+      - "8081:8081"
+    networks:
+      - healthcare-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  provider-service:
+    build:
+      context: ./backend/provider-service
+      dockerfile: Dockerfile
+    container_name: healthcare-provider-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-healthcare_registry}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-healthcare_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-RedisPassword123!}
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      FABRIC_NETWORK_CONFIG_PATH: /app/config/fabric-network.yaml
+    ports:
+      - "8082:8082"
+    networks:
+      - healthcare-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  credential-service:
+    build:
+      context: ./backend/credential-service
+      dockerfile: Dockerfile
+    container_name: healthcare-credential-service
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-healthcare_admin}:${POSTGRES_PASSWORD:-SecurePassword123!}@postgres:5432/${POSTGRES_DB:-healthcare_registry}
+      REDIS_URL: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-RedisPassword123!}
+      IDENTUS_AGENT_URL: http://identus-agent:8085
+      IDENTUS_ADMIN_TOKEN: ${IDENTUS_ADMIN_TOKEN:-identus_admin_token_12345}
+      KEYCLOAK_URL: http://keycloak:8080
+      JWT_SECRET: ${JWT_SECRET:-jwt_secret_key_minimum_32_characters_required_for_security}
+    ports:
+      - "8083:8083"
+    networks:
+      - healthcare-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      identus-agent:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  identity-service:
+    build:
+      context: ./backend/identity-service
+      dockerfile: Dockerfile
+    container_name: healthcare-identity-service
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-healthcare_admin}:${POSTGRES_PASSWORD:-SecurePassword123!}@postgres:5432/${POSTGRES_DB:-healthcare_registry}
+      REDIS_URL: redis://redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-RedisPassword123!}
+      IDENTUS_AGENT_URL: http://identus-agent:8085
+      IDENTUS_ADMIN_TOKEN: ${IDENTUS_ADMIN_TOKEN:-identus_admin_token_12345}
+      KEYCLOAK_URL: http://keycloak:8080
+      JWT_SECRET: ${JWT_SECRET:-jwt_secret_key_minimum_32_characters_required_for_security}
+    ports:
+      - "8084:8084"
+    networks:
+      - healthcare-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      identus-agent:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Applications
+  admin-portal:
+    build:
+      context: ./frontend/admin-portal
+      dockerfile: Dockerfile
+    container_name: healthcare-admin-portal
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8081
+      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_REALM: healthcare-registry
+      REACT_APP_KEYCLOAK_CLIENT_ID: admin-portal
+    ports:
+      - "3001:80"
+    networks:
+      - healthcare-network
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+  provider-portal:
+    build:
+      context: ./frontend/provider-portal
+      dockerfile: Dockerfile
+    container_name: healthcare-provider-portal
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8081
+      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_REALM: healthcare-registry
+      REACT_APP_KEYCLOAK_CLIENT_ID: provider-portal
+    ports:
+      - "3002:80"
+    networks:
+      - healthcare-network
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+  verifier-app:
+    build:
+      context: ./frontend/verifier-app
+      dockerfile: Dockerfile
+    container_name: healthcare-verifier-app
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8081
+      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_KEYCLOAK_REALM: healthcare-registry
+      REACT_APP_KEYCLOAK_CLIENT_ID: verifier-app
+    ports:
+      - "3003:80"
+    networks:
+      - healthcare-network
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+  # Monitoring Services
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: healthcare-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - healthcare-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: healthcare-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-GrafanaAdmin123!}
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    networks:
+      - healthcare-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # Reverse Proxy
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: healthcare-nginx
+    volumes:
+      - ./configs/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./configs/ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - healthcare-network
+    depends_on:
+      - api-gateway
+      - admin-portal
+      - provider-portal
+      - verifier-app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  grafana_data:
+    driver: local
+  prometheus_data:
+    driver: local
+
+networks:
+  healthcare-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+

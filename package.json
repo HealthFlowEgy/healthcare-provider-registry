@@ -1,0 +1,87 @@
+{
+  "name": "healthcare-provider-registry",
+  "version": "1.0.0",
+  "description": "Enterprise healthcare provider registration and verification system with blockchain technology",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend/credential-service && npm install && cd ../identity-service && npm install",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && ./mvnw spring-boot:run -pl api-gateway",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && ./mvnw clean package -DskipTests",
+    "test": "npm run test:frontend && npm run test:backend && npm run test:integration",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && ./mvnw test",
+    "test:integration": "cd tests/integration && npm test",
+    "test:e2e": "cd tests/e2e && npx playwright test",
+    "test:performance": "cd tests/performance && k6 run load-test.js",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && ./mvnw checkstyle:check",
+    "format": "npm run format:frontend && npm run format:backend",
+    "format:frontend": "cd frontend && npm run format",
+    "format:backend": "cd backend && ./mvnw spotless:apply",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "k8s:deploy": "helm install healthcare-registry ./infrastructure/helm/healthcare-registry",
+    "k8s:upgrade": "helm upgrade healthcare-registry ./infrastructure/helm/healthcare-registry",
+    "k8s:uninstall": "helm uninstall healthcare-registry",
+    "blockchain:up": "cd blockchain/fabric-network && ./scripts/network.sh up",
+    "blockchain:down": "cd blockchain/fabric-network && ./scripts/network.sh down",
+    "blockchain:deploy": "cd blockchain/fabric-network && ./scripts/deployCC.sh",
+    "identus:up": "cd identus-agent && docker-compose up -d",
+    "identus:down": "cd identus-agent && docker-compose down",
+    "keycloak:up": "docker-compose up -d keycloak",
+    "keycloak:import": "docker-compose exec keycloak /opt/keycloak/bin/kc.sh import --file /opt/keycloak/data/import/realm-export.json",
+    "security:scan": "npm audit && cd backend && ./mvnw org.owasp:dependency-check-maven:check",
+    "docs:serve": "cd docs && python -m http.server 8080",
+    "clean": "npm run clean:frontend && npm run clean:backend && npm run clean:docker",
+    "clean:frontend": "cd frontend && rm -rf node_modules dist",
+    "clean:backend": "cd backend && ./mvnw clean",
+    "clean:docker": "docker system prune -f && docker volume prune -f"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HealthFlowEgy/healthcare-provider-registry.git"
+  },
+  "keywords": [
+    "healthcare",
+    "blockchain",
+    "hyperledger-fabric",
+    "hyperledger-identus",
+    "keycloak",
+    "verifiable-credentials",
+    "decentralized-identity",
+    "provider-registry",
+    "kubernetes",
+    "microservices"
+  ],
+  "author": "HealthFlow Team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/HealthFlowEgy/healthcare-provider-registry/issues"
+  },
+  "homepage": "https://github.com/HealthFlowEgy/healthcare-provider-registry#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "@playwright/test": "^1.40.0",
+    "k6": "^0.47.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "workspaces": [
+    "frontend/*",
+    "backend/credential-service",
+    "backend/identity-service",
+    "tests/*"
+  ]
+}
+

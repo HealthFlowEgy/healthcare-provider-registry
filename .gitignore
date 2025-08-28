@@ -1,0 +1,188 @@
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# Dependencies
+node_modules/
+target/
+.m2/
+vendor/
+bower_components/
+
+# Build outputs
+dist/
+build/
+out/
+*.jar
+*.war
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output/
+
+# Database
+*.db
+*.sqlite*
+*.sql.backup
+
+# Blockchain artifacts
+blockchain/fabric-network/organizations/peerOrganizations/
+blockchain/fabric-network/organizations/ordererOrganizations/
+blockchain/fabric-network/channel-artifacts/
+blockchain/fabric-network/system-genesis-block/
+*.tar.gz
+*.block
+*.tx
+
+# SSL certificates and keys
+*.pem
+*.crt
+*.key
+*.p12
+*.jks
+*.keystore
+*.truststore
+certs/
+ssl/
+
+# Temporary files
+tmp/
+.tmp/
+temp/
+
+# Terraform
+*.tfstate*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+
+# Kubernetes secrets
+secrets/
+*.secret.yaml
+*-secret.yaml
+
+# Docker
+.dockerignore
+
+# Helm
+charts/*.tgz
+
+# Test results
+test-results/
+playwright-report/
+test-output/
+
+# Performance test results
+load-test-results.json
+load-test-summary.html
+
+# Security scan results
+dependency-check-report.html
+trivy-*.sarif
+
+# Backup files
+*.backup
+*.bak
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Local development
+.local/
+local/
+
+# Documentation build
+docs/_build/
+site/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# SonarQube
+.sonar/
+.scannerwork/
+
+# Monitoring data
+prometheus_data/
+grafana_data/
+
+# Identus agent data
+identus_data/
+
+# Keycloak data
+keycloak_data/
+

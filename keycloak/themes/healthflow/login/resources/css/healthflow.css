@@ -1,0 +1,195 @@
+/* HealthFlow Custom Theme */
+:root {
+  --healthflow-navy: #2B4C8C;
+  --healthflow-gold: #C8A882;
+  --healthflow-light-gold: #E6D4B7;
+  --healthflow-dark-navy: #1A2F5C;
+  --healthflow-white: #FFFFFF;
+  --healthflow-light-gray: #F8F9FA;
+  --healthflow-dark-gray: #6C757D;
+}
+
+/* Main container styling */
+.login-pf body {
+  background: linear-gradient(135deg, var(--healthflow-navy) 0%, var(--healthflow-dark-navy) 100%);
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Login card styling */
+.card-pf {
+  background: var(--healthflow-white);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(43, 76, 140, 0.15);
+  padding: 2rem;
+}
+
+/* Header styling */
+.login-pf-header {
+  margin-bottom: 2rem;
+}
+
+.login-pf-header h1 {
+  color: var(--healthflow-navy);
+  font-weight: 700;
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Logo area */
+.kc-logo-text {
+  background-image: none !important;
+  color: var(--healthflow-navy);
+  font-size: 2rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.kc-logo-text::before {
+  content: "HealthFlow";
+  background: linear-gradient(45deg, var(--healthflow-navy), var(--healthflow-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-control {
+  border: 2px solid #E9ECEF;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--healthflow-gold);
+  box-shadow: 0 0 0 0.2rem rgba(200, 168, 130, 0.25);
+  outline: none;
+}
+
+/* Button styling */
+.btn-primary {
+  background: linear-gradient(135deg, var(--healthflow-navy) 0%, var(--healthflow-dark-navy) 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--healthflow-dark-navy) 0%, var(--healthflow-navy) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(43, 76, 140, 0.3);
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(43, 76, 140, 0.25);
+}
+
+/* Labels */
+.control-label {
+  color: var(--healthflow-navy);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Links */
+a {
+  color: var(--healthflow-gold);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--healthflow-navy);
+  text-decoration: underline;
+}
+
+/* Alert messages */
+.alert-error {
+  background-color: #F8D7DA;
+  border: 1px solid #F5C6CB;
+  color: #721C24;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.alert-success {
+  background-color: #D4EDDA;
+  border: 1px solid #C3E6CB;
+  color: #155724;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Custom HealthFlow branding */
+.login-pf-header::before {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(45deg, var(--healthflow-navy), var(--healthflow-gold));
+  border-radius: 16px;
+  position: relative;
+}
+
+.login-pf-header::after {
+  content: "HF";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-top: -2rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .card-pf {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .login-pf-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Footer */
+.login-pf-footer {
+  color: var(--healthflow-light-gold);
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* Custom checkbox and radio styling */
+.checkbox input[type="checkbox"],
+.radio input[type="radio"] {
+  accent-color: var(--healthflow-gold);
+}
+
+/* Password visibility toggle */
+.password-visibility-toggle {
+  color: var(--healthflow-gold);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.password-visibility-toggle:hover {
+  color: var(--healthflow-navy);
+}
+

@@ -1,0 +1,132 @@
+/* HealthFlow Admin Console Theme */
+:root {
+  --healthflow-navy: #2B4C8C;
+  --healthflow-gold: #C8A882;
+  --healthflow-light-gold: #E6D4B7;
+  --healthflow-dark-navy: #1A2F5C;
+  --healthflow-white: #FFFFFF;
+  --healthflow-light-gray: #F8F9FA;
+}
+
+/* Header styling */
+.navbar-pf {
+  background: linear-gradient(135deg, var(--healthflow-navy) 0%, var(--healthflow-dark-navy) 100%);
+  border-bottom: 3px solid var(--healthflow-gold);
+}
+
+.navbar-brand {
+  color: var(--healthflow-white) !important;
+  font-weight: 700;
+}
+
+.navbar-brand::before {
+  content: "HealthFlow ";
+  color: var(--healthflow-gold);
+}
+
+/* Sidebar styling */
+.nav-pf-vertical {
+  background: var(--healthflow-light-gray);
+  border-right: 2px solid var(--healthflow-light-gold);
+}
+
+.nav-pf-vertical .list-group-item {
+  border-color: var(--healthflow-light-gold);
+  color: var(--healthflow-navy);
+}
+
+.nav-pf-vertical .list-group-item:hover,
+.nav-pf-vertical .list-group-item.active {
+  background: var(--healthflow-gold);
+  color: var(--healthflow-white);
+  border-color: var(--healthflow-gold);
+}
+
+/* Button styling */
+.btn-primary {
+  background: var(--healthflow-navy);
+  border-color: var(--healthflow-navy);
+}
+
+.btn-primary:hover {
+  background: var(--healthflow-dark-navy);
+  border-color: var(--healthflow-dark-navy);
+}
+
+.btn-default {
+  border-color: var(--healthflow-gold);
+  color: var(--healthflow-navy);
+}
+
+.btn-default:hover {
+  background: var(--healthflow-light-gold);
+  border-color: var(--healthflow-gold);
+}
+
+/* Form controls */
+.form-control:focus {
+  border-color: var(--healthflow-gold);
+  box-shadow: 0 0 0 0.2rem rgba(200, 168, 130, 0.25);
+}
+
+/* Tables */
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: rgba(200, 168, 130, 0.1);
+}
+
+/* Badges and labels */
+.label-primary {
+  background-color: var(--healthflow-navy);
+}
+
+.label-info {
+  background-color: var(--healthflow-gold);
+}
+
+/* Breadcrumbs */
+.breadcrumb {
+  background: var(--healthflow-light-gray);
+  border: 1px solid var(--healthflow-light-gold);
+}
+
+.breadcrumb > li + li:before {
+  color: var(--healthflow-gold);
+}
+
+/* Panels */
+.panel-default > .panel-heading {
+  background: var(--healthflow-light-gold);
+  border-color: var(--healthflow-gold);
+  color: var(--healthflow-navy);
+  font-weight: 600;
+}
+
+/* Alerts */
+.alert-success {
+  background-color: rgba(200, 168, 130, 0.1);
+  border-color: var(--healthflow-gold);
+  color: var(--healthflow-dark-navy);
+}
+
+/* Dropdown menus */
+.dropdown-menu > li > a:hover {
+  background-color: var(--healthflow-light-gold);
+  color: var(--healthflow-navy);
+}
+
+/* Progress bars */
+.progress-bar {
+  background-color: var(--healthflow-gold);
+}
+
+/* Custom HealthFlow logo in admin */
+.navbar-brand img {
+  display: none;
+}
+
+.navbar-brand::after {
+  content: " Registry";
+  color: var(--healthflow-light-gold);
+  font-weight: 400;
+}
+

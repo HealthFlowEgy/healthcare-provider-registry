@@ -1,0 +1,250 @@
+{
+  "realm": "healthcare-registry",
+  "displayName": "Healthcare Provider Registry",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "rememberMe": true,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 30,
+  "defaultSignatureAlgorithm": "RS256",
+  "revokeRefreshToken": false,
+  "refreshTokenMaxReuse": 0,
+  "accessTokenLifespan": 300,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "passwordPolicy": "length(12) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername and notEmail and passwordHistory(12) and maxLength(128)",
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA1",
+  "otpPolicyInitialCounter": 0,
+  "otpPolicyDigits": 6,
+  "otpPolicyLookAheadWindow": 1,
+  "otpPolicyPeriod": 30,
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "System",
+      "lastName": "Administrator",
+      "email": "admin@healthcare-registry.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin123!@#",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["SUPER_ADMIN"],
+      "attributes": {
+        "department": ["IT"],
+        "organization": ["Healthcare Registry System"],
+        "mfaEnabled": ["true"]
+      }
+    },
+    {
+      "username": "dr.smith",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "John",
+      "lastName": "Smith",
+      "email": "dr.smith@hospital.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "DrSmith123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["PROVIDER"],
+      "attributes": {
+        "providerType": ["PHYSICIAN"],
+        "specialty": ["CARDIOLOGY"],
+        "licenseNumber": ["MD123456"],
+        "verificationStatus": ["VERIFIED"]
+      }
+    },
+    {
+      "username": "hospital.verifier",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Hospital",
+      "lastName": "Verifier",
+      "email": "verifier@hospital.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "HospitalVerify123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["INSTITUTIONAL_VERIFIER"],
+      "attributes": {
+        "organization": ["General Hospital"],
+        "verifierType": ["INSTITUTIONAL"],
+        "apiAccess": ["true"]
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "SUPER_ADMIN",
+        "description": "Super administrator with full system access",
+        "composite": false,
+        "attributes": {
+          "permissions": ["FULL_SYSTEM_ACCESS", "EMERGENCY_ACCESS", "DATA_EXPORT"]
+        }
+      },
+      {
+        "name": "ADMIN",
+        "description": "System administrator",
+        "composite": false,
+        "attributes": {
+          "permissions": ["PROVIDER_MANAGEMENT", "USER_MANAGEMENT", "SYSTEM_CONFIG"]
+        }
+      },
+      {
+        "name": "REGISTRY_ADMIN",
+        "description": "Registry administrator with limited system access",
+        "composite": false,
+        "attributes": {
+          "permissions": ["PROVIDER_MANAGEMENT", "VERIFICATION_MANAGEMENT"]
+        }
+      },
+      {
+        "name": "VERIFICATION_OFFICER",
+        "description": "Officer responsible for provider verification",
+        "composite": false,
+        "attributes": {
+          "permissions": ["PROVIDER_VERIFICATION", "CREDENTIAL_MANAGEMENT"]
+        }
+      },
+      {
+        "name": "PROVIDER",
+        "description": "Healthcare provider",
+        "composite": false,
+        "attributes": {
+          "permissions": ["PROFILE_MANAGEMENT", "DOCUMENT_UPLOAD", "APPLICATION_TRACKING"]
+        }
+      },
+      {
+        "name": "VERIFIER",
+        "description": "Organization verifying provider credentials",
+        "composite": false,
+        "attributes": {
+          "permissions": ["PROVIDER_SEARCH", "CREDENTIAL_VERIFICATION", "REQUEST_TRACKING"]
+        }
+      },
+      {
+        "name": "INSTITUTIONAL_VERIFIER",
+        "description": "Institutional verifier with enhanced access",
+        "composite": false,
+        "attributes": {
+          "permissions": ["BULK_VERIFICATION", "API_ACCESS", "WEBHOOK_NOTIFICATIONS"]
+        }
+      },
+      {
+        "name": "INDIVIDUAL_VERIFIER",
+        "description": "Individual verifier with basic access",
+        "composite": false,
+        "attributes": {
+          "permissions": ["BASIC_VERIFICATION"]
+        }
+      },
+      {
+        "name": "GUEST",
+        "description": "Public user with limited access",
+        "composite": false,
+        "attributes": {
+          "permissions": ["PUBLIC_DIRECTORY"]
+        }
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "admin-portal",
+      "name": "Healthcare Registry Admin Portal",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "admin-portal-secret-key-12345",
+      "redirectUris": [
+        "http://localhost:3001/*",
+        "https://admin.healthcare-registry.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3001",
+        "https://admin.healthcare-registry.com"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": false
+    },
+    {
+      "clientId": "provider-portal",
+      "name": "Healthcare Provider Portal",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "provider-portal-secret-key-12345",
+      "redirectUris": [
+        "http://localhost:3002/*",
+        "https://provider.healthcare-registry.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3002",
+        "https://provider.healthcare-registry.com"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": false
+    },
+    {
+      "clientId": "verifier-app",
+      "name": "Healthcare Verifier Application",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "verifier-app-secret-key-12345",
+      "redirectUris": [
+        "http://localhost:3003/*",
+        "https://verifier.healthcare-registry.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3003",
+        "https://verifier.healthcare-registry.com"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": false
+    }
+  ]
+}
+

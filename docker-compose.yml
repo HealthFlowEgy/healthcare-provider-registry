@@ -54,9 +54,9 @@ services:
       KC_DB_USERNAME: ${POSTGRES_USER:-healthcare_admin}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
       KC_HOSTNAME: localhost
-      KC_HTTP_ENABLED: true
-      KC_HEALTH_ENABLED: true
-      KC_METRICS_ENABLED: true
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
     command: start-dev
     volumes:
       - ./keycloak/themes:/opt/keycloak/themes
@@ -100,7 +100,7 @@ services:
       CONNECT_DB_PASSWORD: ${POSTGRES_PASSWORD:-SecurePassword123!}
       AGENT_WALLET_SEED: ${IDENTUS_WALLET_SEED:-wallet_seed_minimum_32_characters_required_here}
       API_KEY_SALT: ${IDENTUS_API_KEY_SALT:-identus_salt_32_chars_minimum_req}
-      API_KEY_ENABLED: true
+      API_KEY_ENABLED: "true"
       WEBHOOK_URL: ${IDENTUS_WEBHOOK_URL:-http://api-gateway:8081/webhooks/identus}
       ADMIN_TOKEN: ${IDENTUS_ADMIN_TOKEN:-identus_admin_token_12345}
     ports:
@@ -327,7 +327,7 @@ services:
     container_name: healthcare-grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-GrafanaAdmin123!}
-      GF_USERS_ALLOW_SIGN_UP: false
+      GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./infrastructure/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards

@@ -1,0 +1,378 @@
+{
+  "userAccessProtocol": {
+    "version": "1.0",
+    "description": "Healthcare Provider Registry User Access Control Protocol",
+    "lastUpdated": "2025-08-28",
+    "userTypes": {
+      "ADMIN": {
+        "description": "System administrators with full access",
+        "permissions": {
+          "providers": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true,
+            "verify": true,
+            "suspend": true,
+            "reactivate": true
+          },
+          "credentials": {
+            "issue": true,
+            "revoke": true,
+            "verify": true,
+            "audit": true
+          },
+          "system": {
+            "configuration": true,
+            "monitoring": true,
+            "logs": true,
+            "backup": true,
+            "maintenance": true
+          },
+          "users": {
+            "create": true,
+            "read": true,
+            "update": true,
+            "delete": true,
+            "assignRoles": true
+          },
+          "blockchain": {
+            "networkAdmin": true,
+            "chaincodeManagement": true,
+            "channelManagement": true
+          }
+        },
+        "accessLevels": [
+          "FULL_SYSTEM_ACCESS",
+          "PROVIDER_VERIFICATION",
+          "CREDENTIAL_MANAGEMENT",
+          "USER_MANAGEMENT",
+          "SYSTEM_CONFIGURATION"
+        ],
+        "defaultRedirect": "/admin/dashboard",
+        "sessionTimeout": 480,
+        "mfaRequired": true
+      },
+      "PROVIDER": {
+        "description": "Healthcare providers managing their own profiles",
+        "permissions": {
+          "providers": {
+            "create": false,
+            "read": "own",
+            "update": "own",
+            "delete": false,
+            "verify": false,
+            "suspend": false,
+            "reactivate": false
+          },
+          "credentials": {
+            "issue": false,
+            "revoke": false,
+            "verify": "own",
+            "audit": "own"
+          },
+          "profile": {
+            "updatePersonalInfo": true,
+            "uploadDocuments": true,
+            "manageEducation": true,
+            "manageLicenses": true,
+            "viewVerificationStatus": true
+          },
+          "applications": {
+            "submitForVerification": true,
+            "trackApplicationStatus": true,
+            "respondToQueries": true
+          }
+        },
+        "accessLevels": [
+          "PROFILE_MANAGEMENT",
+          "DOCUMENT_UPLOAD",
+          "APPLICATION_TRACKING"
+        ],
+        "defaultRedirect": "/provider/profile",
+        "sessionTimeout": 240,
+        "mfaRequired": false
+      },
+      "VERIFIER": {
+        "description": "Organizations verifying provider credentials",
+        "permissions": {
+          "providers": {
+            "create": false,
+            "read": "verified_only",
+            "update": false,
+            "delete": false,
+            "verify": false,
+            "suspend": false,
+            "reactivate": false
+          },
+          "credentials": {
+            "issue": false,
+            "revoke": false,
+            "verify": true,
+            "audit": "own_requests"
+          },
+          "verification": {
+            "requestVerification": true,
+            "viewVerificationResults": true,
+            "downloadCredentials": true,
+            "trackRequests": true
+          },
+          "search": {
+            "searchProviders": true,
+            "filterBySpecialty": true,
+            "filterByLocation": true,
+            "filterByStatus": true
+          }
+        },
+        "accessLevels": [
+          "PROVIDER_SEARCH",
+          "CREDENTIAL_VERIFICATION",
+          "REQUEST_TRACKING"
+        ],
+        "defaultRedirect": "/verifier/search",
+        "sessionTimeout": 180,
+        "mfaRequired": true
+      },
+      "GUEST": {
+        "description": "Public users with limited access",
+        "permissions": {
+          "providers": {
+            "create": false,
+            "read": "public_directory",
+            "update": false,
+            "delete": false,
+            "verify": false,
+            "suspend": false,
+            "reactivate": false
+          },
+          "public": {
+            "viewDirectory": true,
+            "searchBasic": true,
+            "viewPublicProfiles": true
+          }
+        },
+        "accessLevels": [
+          "PUBLIC_DIRECTORY"
+        ],
+        "defaultRedirect": "/public/directory",
+        "sessionTimeout": 60,
+        "mfaRequired": false
+      }
+    },
+    "roleHierarchy": {
+      "SUPER_ADMIN": {
+        "inherits": ["ADMIN"],
+        "additionalPermissions": {
+          "system": {
+            "emergencyAccess": true,
+            "dataExport": true,
+            "systemReset": true
+          }
+        }
+      },
+      "REGISTRY_ADMIN": {
+        "inherits": ["ADMIN"],
+        "restrictions": {
+          "system": {
+            "configuration": false,
+            "backup": false
+          }
+        }
+      },
+      "VERIFICATION_OFFICER": {
+        "inherits": ["ADMIN"],
+        "restrictions": {
+          "users": {
+            "create": false,
+            "delete": false,
+            "assignRoles": false
+          },
+          "system": {
+            "configuration": false,
+            "backup": false,
+            "maintenance": false
+          }
+        }
+      },
+      "INSTITUTIONAL_VERIFIER": {
+        "inherits": ["VERIFIER"],
+        "additionalPermissions": {
+          "verification": {
+            "bulkVerification": true,
+            "apiAccess": true,
+            "webhookNotifications": true
+          }
+        }
+      },
+      "INDIVIDUAL_VERIFIER": {
+        "inherits": ["VERIFIER"],
+        "restrictions": {
+          "verification": {
+            "bulkVerification": false,
+            "apiAccess": false
+          }
+        }
+      }
+    },
+    "accessControlRules": {
+      "dataAccess": {
+        "providers": {
+          "personalData": {
+            "ADMIN": "full",
+            "PROVIDER": "own_only",
+            "VERIFIER": "verified_subset",
+            "GUEST": "public_only"
+          },
+          "medicalLicenses": {
+            "ADMIN": "full",
+            "PROVIDER": "own_only",
+            "VERIFIER": "verification_status_only",
+            "GUEST": "none"
+          },
+          "educationHistory": {
+            "ADMIN": "full",
+            "PROVIDER": "own_only",
+            "VERIFIER": "verified_credentials_only",
+            "GUEST": "none"
+          }
+        },
+        "credentials": {
+          "verifiableCredentials": {
+            "ADMIN": "full",
+            "PROVIDER": "own_only",
+            "VERIFIER": "verification_only",
+            "GUEST": "none"
+          },
+          "blockchainRecords": {
+            "ADMIN": "full",
+            "PROVIDER": "own_transactions",
+            "VERIFIER": "verification_proofs",
+            "GUEST": "none"
+          }
+        }
+      },
+      "apiAccess": {
+        "rateLimits": {
+          "ADMIN": {
+            "requestsPerMinute": 1000,
+            "requestsPerHour": 50000
+          },
+          "PROVIDER": {
+            "requestsPerMinute": 100,
+            "requestsPerHour": 5000
+          },
+          "VERIFIER": {
+            "requestsPerMinute": 500,
+            "requestsPerHour": 25000
+          },
+          "GUEST": {
+            "requestsPerMinute": 10,
+            "requestsPerHour": 500
+          }
+        },
+        "allowedEndpoints": {
+          "ADMIN": ["*"],
+          "PROVIDER": [
+            "/api/providers/profile",
+            "/api/providers/documents",
+            "/api/providers/applications",
+            "/api/credentials/own"
+          ],
+          "VERIFIER": [
+            "/api/providers/search",
+            "/api/providers/verify",
+            "/api/credentials/verify",
+            "/api/verification/request"
+          ],
+          "GUEST": [
+            "/api/providers/directory",
+            "/api/public/search"
+          ]
+        }
+      },
+      "uiAccess": {
+        "adminPortal": {
+          "allowedRoles": ["ADMIN", "SUPER_ADMIN", "REGISTRY_ADMIN", "VERIFICATION_OFFICER"]
+        },
+        "providerPortal": {
+          "allowedRoles": ["PROVIDER"]
+        },
+        "verifierApp": {
+          "allowedRoles": ["VERIFIER", "INSTITUTIONAL_VERIFIER", "INDIVIDUAL_VERIFIER"]
+        },
+        "publicDirectory": {
+          "allowedRoles": ["GUEST", "*"]
+        }
+      }
+    },
+    "securityPolicies": {
+      "authentication": {
+        "passwordPolicy": {
+          "minLength": 12,
+          "requireUppercase": true,
+          "requireLowercase": true,
+          "requireNumbers": true,
+          "requireSpecialChars": true,
+          "maxAge": 90,
+          "historyCount": 12
+        },
+        "mfaPolicy": {
+          "requiredForRoles": ["ADMIN", "SUPER_ADMIN", "VERIFIER"],
+          "methods": ["TOTP", "SMS", "EMAIL"],
+          "backupCodes": true
+        },
+        "sessionPolicy": {
+          "maxConcurrentSessions": {
+            "ADMIN": 3,
+            "PROVIDER": 2,
+            "VERIFIER": 5,
+            "GUEST": 1
+          },
+          "idleTimeout": {
+            "ADMIN": 30,
+            "PROVIDER": 60,
+            "VERIFIER": 45,
+            "GUEST": 15
+          }
+        }
+      },
+      "authorization": {
+        "rbacEnabled": true,
+        "abacEnabled": true,
+        "contextualAccess": {
+          "timeBasedAccess": true,
+          "locationBasedAccess": true,
+          "deviceBasedAccess": true
+        }
+      },
+      "auditLogging": {
+        "logAllAccess": true,
+        "logDataChanges": true,
+        "logFailedAttempts": true,
+        "retentionPeriod": 2555,
+        "realTimeAlerts": true
+      }
+    },
+    "complianceRequirements": {
+      "hipaa": {
+        "enabled": true,
+        "auditTrail": true,
+        "dataEncryption": true,
+        "accessLogging": true
+      },
+      "gdpr": {
+        "enabled": true,
+        "dataPortability": true,
+        "rightToErasure": true,
+        "consentManagement": true
+      },
+      "soc2": {
+        "enabled": true,
+        "accessControls": true,
+        "changeManagement": true,
+        "incidentResponse": true
+      }
+    }
+  }
+}
+
